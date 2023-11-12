@@ -1,0 +1,147 @@
+pip install djangorestframework
+
+django-admin startproject name .
+
+python manage.py runserver
+
+python manage.py migrate
+
+#Creating the Admin acess:
+
+python manage.py createsuperuser
+
+# Now I add a new file models.py inside my project folder (drinks) and create the model (class) for my project
+
+from django.db import models
+
+
+class Drink(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.CharField(max_length=500)
+
+    def __str__(self):
+        return self.name + ' ' + self.description
+    
+
+#To create the table in the data base:
+# First, subscribe my app name in settings.py, then:
+
+python.manage.py makemigrations nameapp
+python manage.py migrate
+
+#Then I need to create admin.py inside the project folder and register my model
+
+from django.contrib import admin
+
+from .models import Drink
+
+admin.site.register(Drink)
+
+#After that I should kill the server and run again. The admin panel should have the new model now.
+
+
+##########Creating the API
+
+# In settings, register the new app, like:
+
+rest_framework,
+
+# Create a file in the project folder ( drinks) and call it serializers.py. Then:
+
+from rest_framework import serializers
+from .models import Drink
+
+class DrinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Drink
+        fields = ['id', 'name', 'description']
+
+
+# Now I already have a model and a serializer. Now we just need an endpoint.
+# Create a file views.py inside the folders project
+
+from django.http import JsonResponse
+from .models import Drink
+from .serializers import DrinkSerializer
+
+def drink_list(request):
+    #get all the dinks
+    #serialize them
+    # return json
+    drinks = Drink.objects.all()
+    serializer = DrinkSerializer(drinks, many=True)
+    return JsonResponse({'drinks': serializer.data})
+
+
+#Now I just need to point an url to reach this view. In URLs, add:
+
+from drinks import views
+
+path('drinks/', views.drink_list)
+
+
+#Now the API is working and runnuing ( only for reading data)
+
+# To allow a function on views to accept certain type of request, we need to include a decorator to the funcion:
+
+from rest_framework.decorators import api_views
+
+@api_view(['GET','POST'])
+
+
+
+After that we can handle the requests accordindly to our purpose:
+
+from django.http import JsonResponse
+from .models import Drink
+from .serializers import DrinkSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+
+@api_view(['GET','POST'])
+def drink_list(request):
+    #get all the dinks
+    #serialize them
+    # return json
+    if request.method =='GET':
+        drinks = Drink.objects.all()
+        serializer = DrinkSerializer(drinks, many=True)
+        return JsonResponse({'drinks': serializer.data})
+    
+    if request.method == 'POST':
+        serializer = DrinkSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+#Now we need to be able to reach a drink by id. First we create the path in url:
+
+
+
+
+Resumo:
+1 - Criar projeto
+2 - Registrar em settings
+3 - Criar modelos
+4 - registrar eles em admin ( secao admin)
+5 - Fazer migration
+6 - Criar urls.py e serializers.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
